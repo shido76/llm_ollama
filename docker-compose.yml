@@ -1,0 +1,50 @@
+networks:
+  llm_ollama:
+    name: llm_ollama
+    driver: bridge
+  othernet:
+    name: intra-compose
+    external: true
+
+services:
+  webapp:
+    container_name: llm_ollama-webapp
+    build:
+      context: .
+      dockerfile: ./docker/webapp/Dockerfile
+    entrypoint: ["/app/docker/entrypoint.sh"]
+    volumes:
+      - .:/app
+    depends_on:
+      - llm
+    ports:
+      - "127.0.0.1:5000:5000"
+    env_file: 
+      - .env/development/web
+    stdin_open: true
+    tty: true
+    networks:
+      - llm_ollama
+      - othernet
+
+  llm:
+    container_name: llm_ollama-llm
+    image: ollama/ollama:latest
+    volumes:
+      - .:/app
+      - /home/fabio/llm:/root/.ollama
+    env_file: 
+      - .env/development/web
+    ports:
+      - "127.0.0.1:11434:11434"
+    stdin_open: true
+    tty: true
+    networks:
+      - llm_ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

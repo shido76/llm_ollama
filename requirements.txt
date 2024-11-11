@@ -1,0 +1,13 @@
+pypdf
+openai
+pymssql 
+mssql
+sqlalchemy
+chromadb
+asyncio
+langchain
+langchain_community
+langchain_openai
+llama-index-llms-ollama
+llama_index-embeddings-huggingface
+llama-index-readers-file
