@@ -29,12 +29,12 @@ services:
 
   llm:
     container_name: llm_ollama-llm
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.4.2
     volumes:
       - .:/app
       - /home/fabio/llm:/root/.ollama
     env_file: 
-      - .env/development/web
+      - .env/development/llm
     ports:
       - "127.0.0.1:11434:11434"
     stdin_open: true

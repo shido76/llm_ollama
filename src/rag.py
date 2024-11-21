@@ -8,7 +8,7 @@ from llama_index.core import (
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.ollama import Ollama
 import logging
-import sys, os
+import sys, os, time
 
 def debug():
   logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -18,12 +18,14 @@ def load_data():
   return SimpleDirectoryReader("rag").load_data()
 
 def set_embedding():
+  print("-- Setting embedding model...")
   # bge-base embedding model
   Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
 
+  print("-- Setting llm model...")
   # ollama
   Settings.llm = Ollama(
-    model="llama3", 
+    model="llama3.2", 
     temperature=0,
     max_tokens=1024,
     request_timeout=360.0,
@@ -32,6 +34,7 @@ def set_embedding():
 
 def storage_data():
   PERSIST_DIR = "./storage"
+  print("- Setting embedding and llm model...")
   set_embedding()
   
   if not os.path.exists(PERSIST_DIR):
@@ -48,10 +51,12 @@ def storage_data():
 
   return index
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
   #debug()
+  print("\nRecover storage data...")
   index = storage_data()
   
+  print("\nSet chat engine...")
   chat_engine = index.as_chat_engine(
     similarity_top_k=3,
     chat_mode="condense_question", 
@@ -62,13 +67,15 @@ if __name__ == "__main__":
     # Prompt user for input
     message = input("\nUser: ")
 
+    start_time = time.time()
     # Exit program if user inputs "quit"
     if message.lower() == "quit":
       break
 
     response_stream = chat_engine.stream_chat(message)
     response_stream.print_response_stream()
+    end_time = time.time()
+    
+    print(f"\nTime: {end_time - start_time} seconds")
 
-  # query_engine = index.as_query_engine(streaming=True)
-  # response = query_engine.query("You are a alcatel specialist. How to save current configuration to certified configuration?")
-  # response.print_response_stream()
+  
